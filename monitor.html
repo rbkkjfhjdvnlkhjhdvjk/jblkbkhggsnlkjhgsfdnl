@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Live Traffic Monitor</title>
+    <title>Campaign Traffic Monitor</title>
     <style>
         * {
             margin: 0;
@@ -15,7 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #0a0a12;
             color: #e0e0e0;
-            padding: 20px;
+            padding: 15px;
             min-height: 100vh;
         }
 
@@ -29,15 +29,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
+            padding: 15px 0;
             border-bottom: 2px solid #1a1a2e;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #00d4ff;
             text-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
         }
@@ -49,9 +49,9 @@
         .live-badge {
             background: #ff2d2d;
             color: #fff;
-            padding: 8px 20px;
+            padding: 6px 16px;
             border-radius: 50px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: bold;
             animation: pulse 2s infinite;
         }
@@ -68,55 +68,19 @@
             }
         }
 
-        .filter-bar {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            background: #12121f;
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid #1e1e32;
-            align-items: center;
-        }
-
-        .filter-bar input,
-        .filter-bar select {
-            background: #1a1a2e;
-            border: 1px solid #2a2a42;
-            color: #e0e0e0;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            min-width: 150px;
-        }
-
-        .filter-bar input:focus,
-        .filter-bar select:focus {
-            outline: none;
-            border-color: #00d4ff;
-        }
-
-        .filter-bar label {
-            color: #888;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background: #12121f;
             border: 1px solid #1e1e32;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px;
             text-align: center;
             transition: all 0.3s;
         }
@@ -127,42 +91,79 @@
         }
 
         .stat-card .number {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
             color: #00d4ff;
             display: block;
         }
 
         .stat-card .label {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: #888;
-            margin-top: 5px;
+            margin-top: 3px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .stat-card.bots .number {
             color: #ff6b6b;
         }
-
         .stat-card.humans .number {
             color: #51cf66;
         }
-
         .stat-card.clicks .number {
             color: #fcc419;
         }
-
         .stat-card.landing .number {
             color: #00d4ff;
+        }
+        .stat-card.index .number {
+            color: #a855f7;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            background: #12121f;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid #1e1e32;
+            align-items: center;
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            background: #1a1a2e;
+            border: 1px solid #2a2a42;
+            color: #e0e0e0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            min-width: 120px;
+        }
+
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .filter-bar label {
+            color: #888;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Content Grid */
         .content-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         @media (max-width: 1000px) {
@@ -175,21 +176,21 @@
         .table-container {
             background: #12121f;
             border: 1px solid #1e1e32;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px;
             overflow-x: auto;
         }
 
         .table-container h3 {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: #00d4ff;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
 
         thead {
@@ -197,19 +198,19 @@
         }
 
         th {
-            padding: 10px 12px;
+            padding: 8px 10px;
             text-align: left;
             color: #888;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             letter-spacing: 0.5px;
             border-bottom: 2px solid #2a2a42;
             white-space: nowrap;
         }
 
         td {
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-bottom: 1px solid #1a1a2e;
             vertical-align: middle;
         }
@@ -220,9 +221,9 @@
 
         .status-badge {
             display: inline-block;
-            padding: 2px 10px;
+            padding: 2px 8px;
             border-radius: 50px;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: bold;
             text-transform: uppercase;
             white-space: nowrap;
@@ -252,42 +253,64 @@
             border: 1px solid rgba(0, 212, 255, 0.3);
         }
 
-        .clickid-code {
+        .status-badge.index-page {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .status-badge.support-page {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .tag-code {
             font-family: 'Courier New', monospace;
-            color: #fcc419;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             background: #1a1a2e;
-            padding: 2px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 1px 0;
+        }
+
+        .tag-code.campaign {
+            color: #fcc419;
+        }
+        .tag-code.click {
+            color: #51cf66;
+        }
+        .tag-code.spot {
+            color: #ff6b6b;
         }
 
         /* Log */
         .log-container {
             background: #12121f;
             border: 1px solid #1e1e32;
-            border-radius: 16px;
-            padding: 20px;
-            max-height: 600px;
+            border-radius: 12px;
+            padding: 15px;
+            max-height: 500px;
             display: flex;
             flex-direction: column;
         }
 
         .log-container h3 {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: #00d4ff;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .log-messages {
             flex: 1;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
         .log-messages::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
 
         .log-messages::-webkit-scrollbar-track {
@@ -300,58 +323,53 @@
         }
 
         .log-entry {
-            padding: 4px 0;
+            padding: 3px 0;
             border-bottom: 1px solid #0a0a12;
             color: #aaa;
         }
 
         .log-entry .time {
             color: #555;
-            margin-right: 8px;
-        }
-
-        .log-entry .clickid-log {
-            color: #fcc419;
-            margin-right: 5px;
+            margin-right: 6px;
         }
 
         .log-entry .bot-log {
             color: #ff6b6b;
         }
-
         .log-entry .human-log {
             color: #51cf66;
         }
-
         .log-entry .click-log {
             color: #fcc419;
         }
-
         .log-entry .landing-log {
             color: #00d4ff;
+        }
+        .log-entry .index-log {
+            color: #a855f7;
         }
 
         /* Chart */
         .chart-container {
             background: #12121f;
             border: 1px solid #1e1e32;
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 25px;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
         }
 
         .chart-container h3 {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: #00d4ff;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .chart-bars {
             display: flex;
             align-items: flex-end;
-            gap: 12px;
-            height: 150px;
-            padding-top: 20px;
+            gap: 8px;
+            height: 120px;
+            padding-top: 10px;
         }
 
         .chart-bar {
@@ -359,43 +377,43 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 3px;
         }
 
         .chart-bar .bar {
             width: 100%;
-            border-radius: 4px 4px 0 0;
-            min-height: 5px;
+            border-radius: 3px 3px 0 0;
+            min-height: 3px;
             transition: height 0.5s;
+        }
+
+        .chart-bar .bar.index-bar {
+            background: linear-gradient(180deg, #a855f7, #7c3aed);
+        }
+
+        .chart-bar .bar.support-bar {
+            background: linear-gradient(180deg, #00d4ff, #0077be);
         }
 
         .chart-bar .bar.bot-bar {
             background: linear-gradient(180deg, #ff6b6b, #c0392b);
         }
 
-        .chart-bar .bar.human-bar {
-            background: linear-gradient(180deg, #51cf66, #2d8f47);
-        }
-
-        .chart-bar .bar.landing-bar {
-            background: linear-gradient(180deg, #00d4ff, #0077be);
-        }
-
         .chart-bar .label {
-            font-size: 0.55rem;
+            font-size: 0.5rem;
             color: #666;
             text-align: center;
         }
 
-        /* Export Button */
+        /* Buttons */
         .btn-export {
             background: #1a1a2e;
             color: #00d4ff;
             border: 1px solid #2a2a42;
-            padding: 8px 20px;
-            border-radius: 8px;
+            padding: 6px 15px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.3s;
         }
 
@@ -408,10 +426,10 @@
             background: #1a1a2e;
             color: #ff6b6b;
             border: 1px solid #2a2a42;
-            padding: 8px 20px;
-            border-radius: 8px;
+            padding: 6px 15px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.3s;
         }
 
@@ -422,23 +440,68 @@
 
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .summary-card {
+            background: #12121f;
+            border: 1px solid #1e1e32;
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-card .label {
+            color: #888;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .summary-card .value {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .summary-card .value.green {
+            color: #51cf66;
+        }
+        .summary-card .value.red {
+            color: #ff6b6b;
+        }
+        .summary-card .value.yellow {
+            color: #fcc419;
+        }
+        .summary-card .value.blue {
+            color: #00d4ff;
+        }
+        .summary-card .value.purple {
+            color: #a855f7;
         }
 
         /* Responsive */
         @media (max-width: 600px) {
             .header h1 {
-                font-size: 1.4rem;
+                font-size: 1.2rem;
             }
             .stats-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
             .stat-card .number {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
             .stat-card {
-                padding: 12px;
+                padding: 10px;
             }
             .filter-bar {
                 flex-direction: column;
@@ -447,6 +510,9 @@
             .filter-bar input,
             .filter-bar select {
                 min-width: 100%;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -457,14 +523,62 @@
 
         <!-- Header -->
         <div class="header">
-            <h1>🔍 Live <span>Traffic</span> Monitor</h1>
-            <div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;">
+            <h1>📊 Campaign <span>Traffic</span> Monitor</h1>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <span class="live-badge">● LIVE</span>
-                <span id="lastUpdate" style="color:#555;font-size:0.75rem;">Updating...</span>
+                <span id="lastUpdate" style="color:#555;font-size:0.7rem;">Updating...</span>
                 <div class="header-actions">
                     <button class="btn-export" onclick="exportData()">📥 Export CSV</button>
-                    <button class="btn-clear" onclick="clearData()">🗑️ Clear Data</button>
+                    <button class="btn-clear" onclick="clearData()">🗑️ Clear</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="number" id="totalVisitors">0</span>
+                <span class="label">👥 Total Live</span>
+            </div>
+            <div class="stat-card humans">
+                <span class="number" id="humanVisitors">0</span>
+                <span class="label">👤 Humans</span>
+            </div>
+            <div class="stat-card bots">
+                <span class="number" id="botVisitors">0</span>
+                <span class="label">🤖 Bots</span>
+            </div>
+            <div class="stat-card index">
+                <span class="number" id="indexVisitors">0</span>
+                <span class="label">📄 On index.html</span>
+            </div>
+            <div class="stat-card landing">
+                <span class="number" id="landingVisitors">0</span>
+                <span class="label">🚀 On support.html</span>
+            </div>
+            <div class="stat-card clicks">
+                <span class="number" id="totalClicks">0</span>
+                <span class="label">✅ 18+ Clicks</span>
+            </div>
+        </div>
+
+        <!-- Summary by Campaign -->
+        <div class="summary-grid" id="summaryGrid">
+            <div class="summary-card">
+                <span class="label">📊 Total Campaigns</span>
+                <span class="value blue" id="totalCampaigns">0</span>
+            </div>
+            <div class="summary-card">
+                <span class="label">🎯 Unique Click IDs</span>
+                <span class="value yellow" id="uniqueClickIDs">0</span>
+            </div>
+            <div class="summary-card">
+                <span class="label">📍 Unique Spot IDs</span>
+                <span class="value purple" id="uniqueSpotIDs">0</span>
+            </div>
+            <div class="summary-card">
+                <span class="label">📈 Conversion Rate</span>
+                <span class="value green" id="conversionRate">0%</span>
             </div>
         </div>
 
@@ -477,37 +591,22 @@
                 <option value="bot">🤖 Bots Only</option>
                 <option value="clicked">✅ Clicked 18+</option>
                 <option value="landed">🚀 Reached Landing</option>
+                <option value="index">📄 On index.html</option>
+                <option value="support">🚀 On support.html</option>
             </select>
-            <input type="text" id="searchClickID" placeholder="Search ClickID..." oninput="applyFilters()" />
-            <label style="margin-left:auto;color:#555;">Total: <span id="totalCount">0</span></label>
-        </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="number" id="totalVisitors">0</span>
-                <span class="label">👥 Total Visitors</span>
-            </div>
-            <div class="stat-card humans">
-                <span class="number" id="humanVisitors">0</span>
-                <span class="label">👤 Real Humans</span>
-            </div>
-            <div class="stat-card bots">
-                <span class="number" id="botVisitors">0</span>
-                <span class="label">🤖 Bots Detected</span>
-            </div>
-            <div class="stat-card clicks">
-                <span class="number" id="totalClicks">0</span>
-                <span class="label">✅ 18+ Clicks</span>
-            </div>
-            <div class="stat-card landing">
-                <span class="number" id="landingVisitors">0</span>
-                <span class="label">🚀 Reached Landing</span>
-            </div>
-            <div class="stat-card">
-                <span class="number" id="conversionRate">0%</span>
-                <span class="label">Conversion Rate</span>
-            </div>
+            <label>Campaign:</label>
+            <input type="text" id="searchCampaign" placeholder="campaign_id..." oninput="applyFilters()" />
+
+            <label>Click ID:</label>
+            <input type="text" id="searchClickID" placeholder="click_id..." oninput="applyFilters()" />
+
+            <label>Spot ID:</label>
+            <input type="text" id="searchSpotID" placeholder="spot_id..." oninput="applyFilters()" />
+
+            <span style="color:#555;font-size:0.7rem;margin-left:auto;">
+                Showing: <span id="filteredCount">0</span>
+            </span>
         </div>
 
         <!-- Main Content -->
@@ -519,18 +618,20 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ClickID</th>
+                            <th>Campaign</th>
+                            <th>Click ID</th>
+                            <th>Spot ID</th>
                             <th>Status</th>
-                            <th>18+</th>
-                            <th>Landing</th>
-                            <th>Time</th>
                             <th>Page</th>
+                            <th>18+</th>
+                            <th>Time</th>
+                            <th>Duration</th>
                         </tr>
                     </thead>
                     <tbody id="visitorTableBody">
                         <tr>
-                            <td colspan="6" style="text-align:center;color:#555;padding:30px;">
-                                No visitors yet. Send traffic to your landing page!
+                            <td colspan="8" style="text-align:center;color:#555;padding:20px;">
+                                No visitors yet. Send traffic to your campaign!
                             </td>
                         </tr>
                     </tbody>
@@ -551,9 +652,9 @@
 
         <!-- Chart -->
         <div class="chart-container">
-            <h3>📈 Traffic Breakdown (Last 10 Minutes)</h3>
+            <h3>📈 Page Traffic Breakdown (Last 10 Minutes)</h3>
             <div class="chart-bars" id="chartBars">
-                <div style="color:#555;text-align:center;width:100%;">Loading chart...</div>
+                <div style="color:#555;text-align:center;width:100%;font-size:0.8rem;">Loading chart...</div>
             </div>
         </div>
 
@@ -561,7 +662,8 @@
 
     <script>
         // ============================================================
-        // MONITOR.JS - Full Dashboard with ClickID Support
+        // CAMPAIGN TRAFFIC MONITOR - Full Dashboard
+        // Tracks: campaign_id, click_id, spot_id
         // ============================================================
 
         const REFRESH_INTERVAL = 3000;
@@ -569,21 +671,24 @@
 
         let visitorData = [];
         let logEntries = [];
-        let chartData = [];
         let filteredData = [];
 
         // --- DOM REFS ---
         const totalVisitorsEl = document.getElementById('totalVisitors');
         const humanVisitorsEl = document.getElementById('humanVisitors');
         const botVisitorsEl = document.getElementById('botVisitors');
-        const totalClicksEl = document.getElementById('totalClicks');
+        const indexVisitorsEl = document.getElementById('indexVisitors');
         const landingVisitorsEl = document.getElementById('landingVisitors');
+        const totalClicksEl = document.getElementById('totalClicks');
         const conversionRateEl = document.getElementById('conversionRate');
+        const totalCampaignsEl = document.getElementById('totalCampaigns');
+        const uniqueClickIDsEl = document.getElementById('uniqueClickIDs');
+        const uniqueSpotIDsEl = document.getElementById('uniqueSpotIDs');
         const visitorTableBody = document.getElementById('visitorTableBody');
         const logMessages = document.getElementById('logMessages');
         const chartBars = document.getElementById('chartBars');
         const lastUpdateEl = document.getElementById('lastUpdate');
-        const totalCountEl = document.getElementById('totalCount');
+        const filteredCountEl = document.getElementById('filteredCount');
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -625,37 +730,55 @@
         // --- SAMPLE DATA ---
         function generateSampleData() {
             const now = Date.now();
-            const clickIDs = ['sub_12345', 'sub_67890', 'sub_11111', 'sub_22222', 'sub_33333', 'sub_44444'];
+            const campaigns = ['camp_001', 'camp_002', 'camp_003', 'camp_004'];
+            const clickIDs = ['click_12345', 'click_67890', 'click_11111', 'click_22222', 'click_33333'];
+            const spotIDs = ['spot_A', 'spot_B', 'spot_C', 'spot_D'];
 
-            for (let i = 0; i < 20; i++) {
-                const isBot = Math.random() < 0.3;
+            for (let i = 0; i < 30; i++) {
+                const isBot = Math.random() < 0.30;
                 const clicked = Math.random() < 0.45;
                 const landed = clicked && Math.random() < 0.7;
+                const onIndex = !landed || Math.random() < 0.3;
+
+                const campaign = campaigns[i % campaigns.length];
+                const clickID = clickIDs[i % clickIDs.length] + '_' + i;
+                const spotID = spotIDs[i % spotIDs.length];
 
                 visitorData.push({
                     id: 'v_' + (now + i),
-                    clickID: clickIDs[i % clickIDs.length] + '_' + i,
-                    ip: '192.168.1.' + (i + 10),
-                    timestamp: now - (i * 45000),
+                    campaign_id: campaign,
+                    click_id: clickID,
+                    spot_id: spotID,
+                    ip: '192.168.' + (Math.floor(Math.random() * 255)) + '.' + (Math.floor(Math.random() * 255)),
+                    timestamp: now - (i * 30000),
                     isBot: isBot,
                     clicked18: clicked,
                     landed: landed,
-                    timeOnPage: Math.floor(Math.random() * 30) + 2,
-                    browser: ['Chrome', 'Firefox', 'Safari', 'Edge'][i % 4],
+                    onIndex: onIndex,
+                    page: onIndex ? 'index.html' : 'support.html',
+                    pageTitle: onIndex ? 'Age Verification' : 'Landing Page',
+                    timeOnPage: Math.floor(Math.random() * 45) + 2,
+                    browser: ['Chrome', 'Firefox', 'Safari', 'Edge', 'Brave'][i % 5],
                     userAgent: 'Mozilla/5.0...',
-                    referrer: Math.random() < 0.6 ? 'https://google.com' : 'direct',
-                    page: clicked && landed ? 'support.html' : 'index.html',
-                    pageTitle: clicked && landed ? 'Landing Page' : 'Age Verification'
+                    referrer: Math.random() < 0.5 ? 'https://google.com' : 'direct'
                 });
 
+                const logType = isBot ? 'bot-log' :
+                    (landed ? 'landing-log' :
+                        (clicked ? 'click-log' : 'human-log'));
+
                 logEntries.push({
-                    time: new Date(now - (i * 45000)).toLocaleTimeString(),
-                    clickID: clickIDs[i % clickIDs.length] + '_' + i,
+                    time: new Date(now - (i * 30000)).toLocaleTimeString(),
+                    campaign_id: campaign,
+                    click_id: clickID,
+                    spot_id: spotID,
                     message: (isBot ? '🤖 Bot' : '👤 Human') +
                         (clicked ? ' ✅ clicked 18+ ' : ' visited ') +
-                        (landed ? '🚀 reached Landing' : '') +
-                        ' | ClickID: ' + clickIDs[i % clickIDs.length] + '_' + i,
-                    type: isBot ? 'bot-log' : (landed ? 'landing-log' : (clicked ? 'click-log' : 'human-log'))
+                        (landed ? '🚀 reached Landing ' : '') +
+                        '| Camp: ' + campaign +
+                        ' | Click: ' + clickID +
+                        ' | Spot: ' + spotID,
+                    type: logType
                 });
             }
 
@@ -670,24 +793,32 @@
 
             // Active visitors (last 10 minutes)
             const active = visitorData.filter(v => v.timestamp > tenMinutesAgo);
-            const allTime = visitorData;
 
             // Stats
             const total = active.length;
             const bots = active.filter(v => v.isBot).length;
             const humans = total - bots;
             const clicks = active.filter(v => v.clicked18).length;
-            const landed = active.filter(v => v.landed).length;
-            const conversionRate = total > 0 ? Math.round((landed / total) * 100) : 0;
+            const landing = active.filter(v => v.landed).length;
+            const index = active.filter(v => v.onIndex || (!v.landed && !v.clicked18)).length;
+            const conversion = total > 0 ? Math.round((landing / total) * 100) : 0;
+
+            // Unique tags
+            const uniqueCampaigns = new Set(active.map(v => v.campaign_id).filter(Boolean));
+            const uniqueClicks = new Set(active.map(v => v.click_id).filter(Boolean));
+            const uniqueSpots = new Set(active.map(v => v.spot_id).filter(Boolean));
 
             // Update DOM
             totalVisitorsEl.textContent = total;
             humanVisitorsEl.textContent = humans;
             botVisitorsEl.textContent = bots;
+            indexVisitorsEl.textContent = index;
+            landingVisitorsEl.textContent = landing;
             totalClicksEl.textContent = clicks;
-            landingVisitorsEl.textContent = landed;
-            conversionRateEl.textContent = conversionRate + '%';
-            totalCountEl.textContent = total;
+            conversionRateEl.textContent = conversion + '%';
+            totalCampaignsEl.textContent = uniqueCampaigns.size;
+            uniqueClickIDsEl.textContent = uniqueClicks.size;
+            uniqueSpotIDsEl.textContent = uniqueSpots.size;
 
             // Apply filters and render
             applyFilters();
@@ -696,7 +827,7 @@
             renderLog();
 
             // Update Chart
-            renderChart();
+            renderChart(active);
 
             // Last update time
             lastUpdateEl.textContent = 'Updated: ' + new Date().toLocaleTimeString();
@@ -707,7 +838,9 @@
         // --- FILTERS ---
         function applyFilters() {
             const filterType = document.getElementById('filterType').value;
-            const searchTerm = document.getElementById('searchClickID').value.toLowerCase();
+            const searchCampaign = document.getElementById('searchCampaign').value.toLowerCase();
+            const searchClickID = document.getElementById('searchClickID').value.toLowerCase();
+            const searchSpotID = document.getElementById('searchSpotID').value.toLowerCase();
 
             const now = Date.now();
             const tenMinutesAgo = now - 600000;
@@ -722,14 +855,25 @@
                 data = data.filter(v => v.clicked18);
             } else if (filterType === 'landed') {
                 data = data.filter(v => v.landed);
+            } else if (filterType === 'index') {
+                data = data.filter(v => v.onIndex || (!v.landed && !v.clicked18));
+            } else if (filterType === 'support') {
+                data = data.filter(v => v.landed || v.page === 'support.html');
             }
 
-            // Filter by ClickID
-            if (searchTerm) {
-                data = data.filter(v => (v.clickID || '').toLowerCase().includes(searchTerm));
+            // Filter by tags
+            if (searchCampaign) {
+                data = data.filter(v => (v.campaign_id || '').toLowerCase().includes(searchCampaign));
+            }
+            if (searchClickID) {
+                data = data.filter(v => (v.click_id || '').toLowerCase().includes(searchClickID));
+            }
+            if (searchSpotID) {
+                data = data.filter(v => (v.spot_id || '').toLowerCase().includes(searchSpotID));
             }
 
             filteredData = data;
+            filteredCountEl.textContent = data.length;
             renderTable(data);
         }
 
@@ -741,7 +885,7 @@
             if (recent.length === 0) {
                 visitorTableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align:center;color:#555;padding:30px;">
+                        <td colspan="8" style="text-align:center;color:#555;padding:20px;">
                             No matching visitors found.
                         </td>
                     </tr>
@@ -749,28 +893,37 @@
                 return;
             }
 
-            visitorTableBody.innerHTML = recent.map(v => `
-                <tr>
-                    <td><span class="clickid-code">${v.clickID || 'unknown'}</span></td>
-                    <td>
-                        <span class="status-badge ${v.isBot ? 'bot' : 'human'}">
-                            ${v.isBot ? '🤖 Bot' : '👤 Human'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${v.clicked18 ? 'clicked' : ''}">
-                            ${v.clicked18 ? '✅ Yes' : '❌ No'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${v.landed ? 'landed' : ''}">
-                            ${v.landed ? '🚀 Yes' : '❌ No'}
-                        </span>
-                    </td>
-                    <td style="font-size:0.7rem;color:#888;">${v.timeOnPage || 0}s</td>
-                    <td style="font-size:0.7rem;color:#888;">${v.pageTitle || 'Unknown'}</td>
-                </tr>
-            `).join('');
+            visitorTableBody.innerHTML = recent.map(v => {
+                const pageClass = v.landed || v.page === 'support.html' ? 'support-page' :
+                    (v.onIndex || v.page === 'index.html' ? 'index-page' : '');
+
+                return `
+                    <tr>
+                        <td><span class="tag-code campaign">${v.campaign_id || 'N/A'}</span></td>
+                        <td><span class="tag-code click">${v.click_id || 'N/A'}</span></td>
+                        <td><span class="tag-code spot">${v.spot_id || 'N/A'}</span></td>
+                        <td>
+                            <span class="status-badge ${v.isBot ? 'bot' : 'human'}">
+                                ${v.isBot ? '🤖 Bot' : '👤 Human'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${pageClass}">
+                                ${v.landed ? '🚀 Landing' : (v.onIndex ? '📄 Index' : '📄 ' + (v.page || 'Unknown'))}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${v.clicked18 ? 'clicked' : ''}">
+                                ${v.clicked18 ? '✅ Yes' : '❌ No'}
+                            </span>
+                        </td>
+                        <td style="font-size:0.65rem;color:#888;">${new Date(v.timestamp).toLocaleTimeString()}</td>
+                        <td style="font-size:0.7rem;color:${v.timeOnPage > 10 ? '#51cf66' : '#ff6b6b'}">
+                            ${v.timeOnPage || 0}s
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // --- RENDER LOG ---
@@ -779,7 +932,9 @@
             logMessages.innerHTML = recentLogs.map(entry => `
                 <div class="log-entry">
                     <span class="time">[${entry.time}]</span>
-                    ${entry.clickID ? `<span class="clickid-log">[${entry.clickID}]</span>` : ''}
+                    ${entry.campaign_id ? `<span style="color:#fcc419;">[${entry.campaign_id}]</span>` : ''}
+                    ${entry.click_id ? `<span style="color:#51cf66;">[${entry.click_id}]</span>` : ''}
+                    ${entry.spot_id ? `<span style="color:#ff6b6b;">[${entry.spot_id}]</span>` : ''}
                     <span class="${entry.type || ''}">${entry.message}</span>
                 </div>
             `).join('');
@@ -788,13 +943,9 @@
         }
 
         // --- RENDER CHART ---
-        function renderChart() {
-            const now = Date.now();
-            const tenMinutesAgo = now - 600000;
-            const data = visitorData.filter(v => v.timestamp > tenMinutesAgo);
-
+        function renderChart(data) {
             if (data.length === 0) {
-                chartBars.innerHTML = '<div style="color:#555;text-align:center;width:100%;">No data to display</div>';
+                chartBars.innerHTML = '<div style="color:#555;text-align:center;width:100%;font-size:0.8rem;">No data to display</div>';
                 return;
             }
 
@@ -803,29 +954,33 @@
             data.forEach(v => {
                 const minute = new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 if (!groups[minute]) {
-                    groups[minute] = { bots: 0, humans: 0, landed: 0 };
+                    groups[minute] = { index: 0, support: 0, bots: 0 };
                 }
-                if (v.isBot) groups[minute].bots++;
-                else groups[minute].humans++;
-                if (v.landed) groups[minute].landed++;
+                if (v.isBot) {
+                    groups[minute].bots++;
+                } else if (v.landed || v.page === 'support.html') {
+                    groups[minute].support++;
+                } else {
+                    groups[minute].index++;
+                }
             });
 
             const keys = Object.keys(groups);
             const maxValue = Math.max(
-                ...keys.map(k => Math.max(groups[k].bots, groups[k].humans, groups[k].landed)),
+                ...keys.map(k => Math.max(groups[k].index, groups[k].support, groups[k].bots)),
                 1
             );
 
             chartBars.innerHTML = keys.map(key => {
                 const data = groups[key];
-                const botH = (data.bots / maxValue) * 120 + 5;
-                const humanH = (data.humans / maxValue) * 120 + 5;
-                const landingH = (data.landed / maxValue) * 120 + 5;
+                const indexH = (data.index / maxValue) * 100 + 5;
+                const supportH = (data.support / maxValue) * 100 + 5;
+                const botH = (data.bots / maxValue) * 100 + 5;
                 return `
                     <div class="chart-bar">
-                        <div class="bar landing-bar" style="height:${landingH}px;background:linear-gradient(180deg,#00d4ff,#0077be);"></div>
-                        <div class="bar human-bar" style="height:${humanH}px;background:linear-gradient(180deg,#51cf66,#2d8f47);"></div>
-                        <div class="bar bot-bar" style="height:${botH}px;background:linear-gradient(180deg,#ff6b6b,#c0392b);"></div>
+                        <div class="bar index-bar" style="height:${indexH}px;"></div>
+                        <div class="bar support-bar" style="height:${supportH}px;"></div>
+                        <div class="bar bot-bar" style="height:${botH}px;"></div>
                         <div class="label">${key}</div>
                     </div>
                 `;
@@ -848,16 +1003,17 @@
                 return;
             }
 
-            let csv = 'ClickID,IP,Time,IsBot,Clicked18,Landed,TimeOnPage,Page\n';
+            let csv = 'Campaign_ID,Click_ID,Spot_ID,IP,Time,IsBot,Clicked18,Landed,Page,TimeOnPage\n';
             data.forEach(v => {
-                csv += `${v.clickID || 'unknown'},${v.ip},${new Date(v.timestamp).toLocaleString()},${v.isBot},${v.clicked18},${v.landed || false},${v.timeOnPage || 0},${v.page || 'unknown'}\n`;
+                csv +=
+                    `${v.campaign_id || 'N/A'},${v.click_id || 'N/A'},${v.spot_id || 'N/A'},${v.ip || 'N/A'},${new Date(v.timestamp).toLocaleString()},${v.isBot},${v.clicked18},${v.landed || false},${v.page || 'N/A'},${v.timeOnPage || 0}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'visitor_data_' + new Date().toISOString().slice(0, 10) + '.csv';
+            a.download = 'campaign_data_' + new Date().toISOString().slice(0, 10) + '.csv';
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -877,8 +1033,8 @@
         window.exportData = exportData;
         window.clearData = clearData;
 
-        console.log('🔍 Traffic Monitor is running!');
-        console.log('📊 Watching for visitors with ClickID tracking');
+        console.log('📊 Campaign Traffic Monitor is running!');
+        console.log('📌 Tracking: campaign_id, click_id, spot_id');
     </script>
 
 </body>
