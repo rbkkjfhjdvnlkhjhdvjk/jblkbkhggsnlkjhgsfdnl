@@ -108,19 +108,27 @@
     <script src="js/NisifAZ.js"></script>
 
 
- <script>
+  <script>
         (function() {
             'use strict';
 
-            // --- GET CLICKID FROM URL ---
-            function getClickID() {
+            // ==========================================================
+            // 1. GET ALL URL PARAMETERS
+            // ==========================================================
+            function getURLParams() {
                 const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get('clickid') || urlParams.get('SUBID') || 'unknown';
+                return {
+                    campaign_id: urlParams.get('campaign_id') || urlParams.get('campaign') || 'unknown',
+                    click_id: urlParams.get('click_id') || urlParams.get('clickid') || urlParams.get('SUBID') || 'unknown',
+                    spot_id: urlParams.get('spot_id') || urlParams.get('spot') || 'unknown'
+                };
             }
 
-            const clickID = getClickID();
+            const params = getURLParams();
 
-            // --- BOT DETECTION ---
+            // ==========================================================
+            // 2. BOT DETECTION
+            // ==========================================================
             function isBot() {
                 if (navigator.webdriver === true) return true;
                 if (!navigator.hardwareConcurrency || navigator.hardwareConcurrency < 2) return true;
@@ -130,50 +138,61 @@
                     'curl', 'wget', 'python-requests', 'Go-http-client',
                     'java', 'perl', 'ruby', 'node-fetch', 'HeadlessChrome',
                     'Googlebot', 'Bingbot', 'Slurp', 'DuckDuckBot',
-                    'Baiduspider', 'YandexBot'
+                    'Baiduspider', 'YandexBot', 'AhrefsBot', 'SemrushBot'
                 ];
                 const ua = navigator.userAgent;
                 for (let pattern of botPatterns) {
                     if (ua.includes(pattern)) return true;
                 }
+
+                if (!window.screen || window.screen.width === 0) return true;
                 return false;
             }
 
+            // ==========================================================
+            // 3. GENERATE VISITOR ID
+            // ==========================================================
             const visitorID = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
             const isBotDetected = isBot();
             let startTime = Date.now();
-            let pageTitle = document.title;
+            let clickActivityLogged = false;
 
-            // --- SEND LANDING PAGE VISIT ---
+            // ==========================================================
+            // 4. SEND LANDING PAGE VISIT
+            // ==========================================================
             function sendLandingVisit(clicked = true) {
                 const timeOnPage = Math.round((Date.now() - startTime) / 1000);
 
                 const data = {
                     id: visitorID,
-                    clickID: clickID,
+                    campaign_id: params.campaign_id,
+                    click_id: params.click_id,
+                    spot_id: params.spot_id,
                     ip: '{{VISITOR_IP}}',
                     timestamp: Date.now(),
                     isBot: isBotDetected,
-                    clicked18: clicked, // They clicked 18+ to get here
+                    clicked18: true,
+                    landed: true,
                     timeOnPage: timeOnPage,
+                    page: 'support.html',
+                    pageTitle: document.title || 'Landing Page',
                     browser: navigator.userAgent,
                     userAgent: navigator.userAgent,
                     referrer: document.referrer || 'direct',
-                    country: '{{VISITOR_COUNTRY}}',
-                    page: window.location.href,
-                    pageTitle: 'Landing Page - ' + pageTitle,
                     screen: window.screen.width + 'x' + window.screen.height,
                     language: navigator.language,
-                    landed: true // Flag to show they reached the landing page
+                    onIndex: false
                 };
 
                 try {
                     let monitorData = JSON.parse(localStorage.getItem('visitorData') || '[]');
 
-                    // Try to find existing visitor by ClickID
-                    const existingIndex = monitorData.findIndex(v => v.clickID === clickID && v.clicked18 === true);
+                    const existingIndex = monitorData.findIndex(v =>
+                        (v.click_id === params.click_id && params.click_id !== 'unknown') ||
+                        v.id === visitorID
+                    );
+
                     if (existingIndex !== -1) {
-                        // Update existing visitor with landing page data
                         monitorData[existingIndex] = { ...monitorData[existingIndex], ...data };
                     } else {
                         monitorData.push(data);
@@ -181,34 +200,69 @@
 
                     localStorage.setItem('visitorData', JSON.stringify(monitorData));
 
-                    // Log the landing page visit
                     let logs = JSON.parse(localStorage.getItem('logEntries') || '[]');
                     logs.push({
                         time: new Date().toLocaleTimeString(),
-                        clickID: clickID,
+                        campaign_id: params.campaign_id,
+                        click_id: params.click_id,
+                        spot_id: params.spot_id,
                         message: '🚀 ' + (isBotDetected ? '🤖 Bot' : '👤 Human') +
-                            ' reached LANDING PAGE | ClickID: ' + clickID +
-                            ' | Time on page: ' + timeOnPage + 's',
-                        type: 'landing-log',
-                        clickID: clickID
+                            ' reached LANDING PAGE | Camp: ' + params.campaign_id +
+                            ' | Click: ' + params.click_id +
+                            ' | Spot: ' + params.spot_id +
+                            ' | Duration: ' + timeOnPage + 's',
+                        type: 'landing-log'
                     });
 
                     if (logs.length > 500) logs = logs.slice(-500);
                     localStorage.setItem('logEntries', JSON.stringify(logs));
 
                 } catch (e) {
-                    console.log('Landing tracking error:', e);
+                    // Silent fail
                 }
 
-                console.log('📊 Landing page tracked for ClickID:', clickID);
+                if (!clickActivityLogged) {
+                    logClickActivity(timeOnPage);
+                    clickActivityLogged = true;
+                }
             }
 
-            // --- TRACK ON LOAD ---
+            // ==========================================================
+            // 5. LOG CLICK ACTIVITY
+            // ==========================================================
+            function logClickActivity(duration) {
+                try {
+                    let clickLogs = JSON.parse(localStorage.getItem('clickActivityLogs') || '[]');
+                    clickLogs.push({
+                        time: new Date().toLocaleTimeString(),
+                        timestamp: Date.now(),
+                        campaign_id: params.campaign_id,
+                        click_id: params.click_id,
+                        spot_id: params.spot_id,
+                        duration: duration,
+                        isBot: isBotDetected,
+                        page: 'support.html',
+                        action: 'clicked_18_and_landed',
+                        referrer: document.referrer || 'direct'
+                    });
+
+                    if (clickLogs.length > 500) clickLogs = clickLogs.slice(-500);
+                    localStorage.setItem('clickActivityLogs', JSON.stringify(clickLogs));
+
+                } catch (e) {
+                    // Silent fail
+                }
+            }
+
+            // ==========================================================
+            // 6. TRACKING ON PAGE LOAD
+            // ==========================================================
             document.addEventListener('DOMContentLoaded', function() {
+
                 // Send initial landing visit
                 sendLandingVisit(true);
 
-                // Track time on page
+                // Track on page unload
                 window.addEventListener('beforeunload', function() {
                     sendLandingVisit(true);
                 });
@@ -216,17 +270,40 @@
                 // Re-send after intervals
                 setTimeout(function() { sendLandingVisit(true); }, 5000);
                 setTimeout(function() { sendLandingVisit(true); }, 30000);
+
+                // ==========================================================
+                // 7. LOG CLICK ACTIVITY ON PAGE INTERACTIONS
+                // ==========================================================
+                const allButtons = document.querySelectorAll('button, a');
+                allButtons.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const duration = Math.round((Date.now() - startTime) / 1000);
+                        logClickActivity(duration);
+                    });
+                });
+
+                // Track page scroll (engagement)
+                let scrollLogged = false;
+                window.addEventListener('scroll', function() {
+                    if (!scrollLogged) {
+                        const duration = Math.round((Date.now() - startTime) / 1000);
+                        logClickActivity(duration);
+                        scrollLogged = true;
+                    }
+                });
+
+                // ==========================================================
+                // 8. EXPOSE FOR DEBUGGING (only via console)
+                // ==========================================================
+                window.__landingTracker = {
+                    visitorID: visitorID,
+                    params: params,
+                    isBot: isBotDetected,
+                    sendData: sendLandingVisit,
+                    logClick: logClickActivity
+                };
+
             });
-
-            console.log('📊 Landing page tracking active for ClickID:', clickID);
-            console.log('🤖 Bot detected:', isBotDetected);
-
-            window.__landingTracker = {
-                visitorID: visitorID,
-                clickID: clickID,
-                isBot: isBotDetected,
-                sendData: sendLandingVisit
-            };
 
         })();
     </script>
