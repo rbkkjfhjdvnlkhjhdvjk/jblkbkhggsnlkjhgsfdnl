@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Traffic Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a12;
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #1a1a2e;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .header h1 span {
+            color: #ff6b6b;
+        }
+
+        .live-badge {
+            background: #ff2d2d;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(0.95);
+            }
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: #12121f;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid #1e1e32;
+            align-items: center;
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            background: #1a1a2e;
+            border: 1px solid #2a2a42;
+            color: #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            min-width: 150px;
+        }
+
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .filter-bar label {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #12121f;
+            border: 1px solid #1e1e32;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #00d4ff;
+            display: block;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card.bots .number {
+            color: #ff6b6b;
+        }
+
+        .stat-card.humans .number {
+            color: #51cf66;
+        }
+
+        .stat-card.clicks .number {
+            color: #fcc419;
+        }
+
+        .stat-card.landing .number {
+            color: #00d4ff;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1000px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Table */
+        .table-container {
+            background: #12121f;
+            border: 1px solid #1e1e32;
+            border-radius: 16px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            margin-bottom: 15px;
+            color: #00d4ff;
+            font-size: 1.1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        thead {
+            background: #1a1a2e;
+        }
+
+        th {
+            padding: 10px 12px;
+            text-align: left;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #2a2a42;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1a1a2e;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #1a1a2e;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-badge.human {
+            background: rgba(81, 207, 102, 0.2);
+            color: #51cf66;
+            border: 1px solid rgba(81, 207, 102, 0.3);
+        }
+
+        .status-badge.bot {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .status-badge.clicked {
+            background: rgba(252, 196, 25, 0.2);
+            color: #fcc419;
+            border: 1px solid rgba(252, 196, 25, 0.3);
+        }
+
+        .status-badge.landed {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .clickid-code {
+            font-family: 'Courier New', monospace;
+            color: #fcc419;
+            font-size: 0.7rem;
+            background: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* Log */
+        .log-container {
+            background: #12121f;
+            border: 1px solid #1e1e32;
+            border-radius: 16px;
+            padding: 20px;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-container h3 {
+            margin-bottom: 15px;
+            color: #00d4ff;
+            font-size: 1.1rem;
+        }
+
+        .log-messages {
+            flex: 1;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+        }
+
+        .log-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-messages::-webkit-scrollbar-track {
+            background: #0a0a12;
+        }
+
+        .log-messages::-webkit-scrollbar-thumb {
+            background: #2a2a42;
+            border-radius: 10px;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #0a0a12;
+            color: #aaa;
+        }
+
+        .log-entry .time {
+            color: #555;
+            margin-right: 8px;
+        }
+
+        .log-entry .clickid-log {
+            color: #fcc419;
+            margin-right: 5px;
+        }
+
+        .log-entry .bot-log {
+            color: #ff6b6b;
+        }
+
+        .log-entry .human-log {
+            color: #51cf66;
+        }
+
+        .log-entry .click-log {
+            color: #fcc419;
+        }
+
+        .log-entry .landing-log {
+            color: #00d4ff;
+        }
+
+        /* Chart */
+        .chart-container {
+            background: #12121f;
+            border: 1px solid #1e1e32;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 15px;
+            color: #00d4ff;
+            font-size: 1.1rem;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            height: 150px;
+            padding-top: 20px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chart-bar .bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            min-height: 5px;
+            transition: height 0.5s;
+        }
+
+        .chart-bar .bar.bot-bar {
+            background: linear-gradient(180deg, #ff6b6b, #c0392b);
+        }
+
+        .chart-bar .bar.human-bar {
+            background: linear-gradient(180deg, #51cf66, #2d8f47);
+        }
+
+        .chart-bar .bar.landing-bar {
+            background: linear-gradient(180deg, #00d4ff, #0077be);
+        }
+
+        .chart-bar .label {
+            font-size: 0.55rem;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Export Button */
+        .btn-export {
+            background: #1a1a2e;
+            color: #00d4ff;
+            border: 1px solid #2a2a42;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .btn-export:hover {
+            background: #2a2a42;
+            border-color: #00d4ff;
+        }
+
+        .btn-clear {
+            background: #1a1a2e;
+            color: #ff6b6b;
+            border: 1px solid #2a2a42;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .btn-clear:hover {
+            background: #2a2a42;
+            border-color: #ff6b6b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stat-card .number {
+                font-size: 1.8rem;
+            }
+            .stat-card {
+                padding: 12px;
+            }
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-bar input,
+            .filter-bar select {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>🔍 Live <span>Traffic</span> Monitor</h1>
+            <div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;">
+                <span class="live-badge">● LIVE</span>
+                <span id="lastUpdate" style="color:#555;font-size:0.75rem;">Updating...</span>
+                <div class="header-actions">
+                    <button class="btn-export" onclick="exportData()">📥 Export CSV</button>
+                    <button class="btn-clear" onclick="clearData()">🗑️ Clear Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <label>🔍 Filter:</label>
+            <select id="filterType" onchange="applyFilters()">
+                <option value="all">All Visitors</option>
+                <option value="human">👤 Humans Only</option>
+                <option value="bot">🤖 Bots Only</option>
+                <option value="clicked">✅ Clicked 18+</option>
+                <option value="landed">🚀 Reached Landing</option>
+            </select>
+            <input type="text" id="searchClickID" placeholder="Search ClickID..." oninput="applyFilters()" />
+            <label style="margin-left:auto;color:#555;">Total: <span id="totalCount">0</span></label>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="number" id="totalVisitors">0</span>
+                <span class="label">👥 Total Visitors</span>
+            </div>
+            <div class="stat-card humans">
+                <span class="number" id="humanVisitors">0</span>
+                <span class="label">👤 Real Humans</span>
+            </div>
+            <div class="stat-card bots">
+                <span class="number" id="botVisitors">0</span>
+                <span class="label">🤖 Bots Detected</span>
+            </div>
+            <div class="stat-card clicks">
+                <span class="number" id="totalClicks">0</span>
+                <span class="label">✅ 18+ Clicks</span>
+            </div>
+            <div class="stat-card landing">
+                <span class="number" id="landingVisitors">0</span>
+                <span class="label">🚀 Reached Landing</span>
+            </div>
+            <div class="stat-card">
+                <span class="number" id="conversionRate">0%</span>
+                <span class="label">Conversion Rate</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-grid">
+
+            <!-- Table -->
+            <div class="table-container">
+                <h3>📊 Visitor Log</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ClickID</th>
+                            <th>Status</th>
+                            <th>18+</th>
+                            <th>Landing</th>
+                            <th>Time</th>
+                            <th>Page</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:#555;padding:30px;">
+                                No visitors yet. Send traffic to your landing page!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Log -->
+            <div class="log-container">
+                <h3>📝 Live Activity Log</h3>
+                <div class="log-messages" id="logMessages">
+                    <div class="log-entry" style="color:#555;">
+                        <span class="time">[System]</span> Monitoring started...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+            <h3>📈 Traffic Breakdown (Last 10 Minutes)</h3>
+            <div class="chart-bars" id="chartBars">
+                <div style="color:#555;text-align:center;width:100%;">Loading chart...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // MONITOR.JS - Full Dashboard with ClickID Support
+        // ============================================================
+
+        const REFRESH_INTERVAL = 3000;
+        const MAX_TABLE_ROWS = 50;
+
+        let visitorData = [];
+        let logEntries = [];
+        let chartData = [];
+        let filteredData = [];
+
+        // --- DOM REFS ---
+        const totalVisitorsEl = document.getElementById('totalVisitors');
+        const humanVisitorsEl = document.getElementById('humanVisitors');
+        const botVisitorsEl = document.getElementById('botVisitors');
+        const totalClicksEl = document.getElementById('totalClicks');
+        const landingVisitorsEl = document.getElementById('landingVisitors');
+        const conversionRateEl = document.getElementById('conversionRate');
+        const visitorTableBody = document.getElementById('visitorTableBody');
+        const logMessages = document.getElementById('logMessages');
+        const chartBars = document.getElementById('chartBars');
+        const lastUpdateEl = document.getElementById('lastUpdate');
+        const totalCountEl = document.getElementById('totalCount');
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            updateDashboard();
+            startAutoRefresh();
+
+            if (visitorData.length === 0) {
+                generateSampleData();
+            }
+        });
+
+        // --- STORAGE ---
+        function loadFromStorage() {
+            const stored = localStorage.getItem('visitorData');
+            if (stored) {
+                try {
+                    visitorData = JSON.parse(stored);
+                } catch (e) {
+                    visitorData = [];
+                }
+            }
+
+            const storedLogs = localStorage.getItem('logEntries');
+            if (storedLogs) {
+                try {
+                    logEntries = JSON.parse(storedLogs);
+                } catch (e) {
+                    logEntries = [];
+                }
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('visitorData', JSON.stringify(visitorData));
+            localStorage.setItem('logEntries', JSON.stringify(logEntries));
+        }
+
+        // --- SAMPLE DATA ---
+        function generateSampleData() {
+            const now = Date.now();
+            const clickIDs = ['sub_12345', 'sub_67890', 'sub_11111', 'sub_22222', 'sub_33333', 'sub_44444'];
+
+            for (let i = 0; i < 20; i++) {
+                const isBot = Math.random() < 0.3;
+                const clicked = Math.random() < 0.45;
+                const landed = clicked && Math.random() < 0.7;
+
+                visitorData.push({
+                    id: 'v_' + (now + i),
+                    clickID: clickIDs[i % clickIDs.length] + '_' + i,
+                    ip: '192.168.1.' + (i + 10),
+                    timestamp: now - (i * 45000),
+                    isBot: isBot,
+                    clicked18: clicked,
+                    landed: landed,
+                    timeOnPage: Math.floor(Math.random() * 30) + 2,
+                    browser: ['Chrome', 'Firefox', 'Safari', 'Edge'][i % 4],
+                    userAgent: 'Mozilla/5.0...',
+                    referrer: Math.random() < 0.6 ? 'https://google.com' : 'direct',
+                    page: clicked && landed ? 'support.html' : 'index.html',
+                    pageTitle: clicked && landed ? 'Landing Page' : 'Age Verification'
+                });
+
+                logEntries.push({
+                    time: new Date(now - (i * 45000)).toLocaleTimeString(),
+                    clickID: clickIDs[i % clickIDs.length] + '_' + i,
+                    message: (isBot ? '🤖 Bot' : '👤 Human') +
+                        (clicked ? ' ✅ clicked 18+ ' : ' visited ') +
+                        (landed ? '🚀 reached Landing' : '') +
+                        ' | ClickID: ' + clickIDs[i % clickIDs.length] + '_' + i,
+                    type: isBot ? 'bot-log' : (landed ? 'landing-log' : (clicked ? 'click-log' : 'human-log'))
+                });
+            }
+
+            saveToStorage();
+            updateDashboard();
+        }
+
+        // --- DASHBOARD UPDATE ---
+        function updateDashboard() {
+            const now = Date.now();
+            const tenMinutesAgo = now - 600000;
+
+            // Active visitors (last 10 minutes)
+            const active = visitorData.filter(v => v.timestamp > tenMinutesAgo);
+            const allTime = visitorData;
+
+            // Stats
+            const total = active.length;
+            const bots = active.filter(v => v.isBot).length;
+            const humans = total - bots;
+            const clicks = active.filter(v => v.clicked18).length;
+            const landed = active.filter(v => v.landed).length;
+            const conversionRate = total > 0 ? Math.round((landed / total) * 100) : 0;
+
+            // Update DOM
+            totalVisitorsEl.textContent = total;
+            humanVisitorsEl.textContent = humans;
+            botVisitorsEl.textContent = bots;
+            totalClicksEl.textContent = clicks;
+            landingVisitorsEl.textContent = landed;
+            conversionRateEl.textContent = conversionRate + '%';
+            totalCountEl.textContent = total;
+
+            // Apply filters and render
+            applyFilters();
+
+            // Update Log
+            renderLog();
+
+            // Update Chart
+            renderChart();
+
+            // Last update time
+            lastUpdateEl.textContent = 'Updated: ' + new Date().toLocaleTimeString();
+
+            saveToStorage();
+        }
+
+        // --- FILTERS ---
+        function applyFilters() {
+            const filterType = document.getElementById('filterType').value;
+            const searchTerm = document.getElementById('searchClickID').value.toLowerCase();
+
+            const now = Date.now();
+            const tenMinutesAgo = now - 600000;
+            let data = visitorData.filter(v => v.timestamp > tenMinutesAgo);
+
+            // Filter by type
+            if (filterType === 'human') {
+                data = data.filter(v => !v.isBot);
+            } else if (filterType === 'bot') {
+                data = data.filter(v => v.isBot);
+            } else if (filterType === 'clicked') {
+                data = data.filter(v => v.clicked18);
+            } else if (filterType === 'landed') {
+                data = data.filter(v => v.landed);
+            }
+
+            // Filter by ClickID
+            if (searchTerm) {
+                data = data.filter(v => (v.clickID || '').toLowerCase().includes(searchTerm));
+            }
+
+            filteredData = data;
+            renderTable(data);
+        }
+
+        // --- RENDER TABLE ---
+        function renderTable(data) {
+            const sorted = [...data].sort((a, b) => b.timestamp - a.timestamp);
+            const recent = sorted.slice(0, MAX_TABLE_ROWS);
+
+            if (recent.length === 0) {
+                visitorTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center;color:#555;padding:30px;">
+                            No matching visitors found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            visitorTableBody.innerHTML = recent.map(v => `
+                <tr>
+                    <td><span class="clickid-code">${v.clickID || 'unknown'}</span></td>
+                    <td>
+                        <span class="status-badge ${v.isBot ? 'bot' : 'human'}">
+                            ${v.isBot ? '🤖 Bot' : '👤 Human'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${v.clicked18 ? 'clicked' : ''}">
+                            ${v.clicked18 ? '✅ Yes' : '❌ No'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${v.landed ? 'landed' : ''}">
+                            ${v.landed ? '🚀 Yes' : '❌ No'}
+                        </span>
+                    </td>
+                    <td style="font-size:0.7rem;color:#888;">${v.timeOnPage || 0}s</td>
+                    <td style="font-size:0.7rem;color:#888;">${v.pageTitle || 'Unknown'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- RENDER LOG ---
+        function renderLog() {
+            const recentLogs = logEntries.slice(-50);
+            logMessages.innerHTML = recentLogs.map(entry => `
+                <div class="log-entry">
+                    <span class="time">[${entry.time}]</span>
+                    ${entry.clickID ? `<span class="clickid-log">[${entry.clickID}]</span>` : ''}
+                    <span class="${entry.type || ''}">${entry.message}</span>
+                </div>
+            `).join('');
+
+            logMessages.scrollTop = logMessages.scrollHeight;
+        }
+
+        // --- RENDER CHART ---
+        function renderChart() {
+            const now = Date.now();
+            const tenMinutesAgo = now - 600000;
+            const data = visitorData.filter(v => v.timestamp > tenMinutesAgo);
+
+            if (data.length === 0) {
+                chartBars.innerHTML = '<div style="color:#555;text-align:center;width:100%;">No data to display</div>';
+                return;
+            }
+
+            // Group by minute
+            const groups = {};
+            data.forEach(v => {
+                const minute = new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (!groups[minute]) {
+                    groups[minute] = { bots: 0, humans: 0, landed: 0 };
+                }
+                if (v.isBot) groups[minute].bots++;
+                else groups[minute].humans++;
+                if (v.landed) groups[minute].landed++;
+            });
+
+            const keys = Object.keys(groups);
+            const maxValue = Math.max(
+                ...keys.map(k => Math.max(groups[k].bots, groups[k].humans, groups[k].landed)),
+                1
+            );
+
+            chartBars.innerHTML = keys.map(key => {
+                const data = groups[key];
+                const botH = (data.bots / maxValue) * 120 + 5;
+                const humanH = (data.humans / maxValue) * 120 + 5;
+                const landingH = (data.landed / maxValue) * 120 + 5;
+                return `
+                    <div class="chart-bar">
+                        <div class="bar landing-bar" style="height:${landingH}px;background:linear-gradient(180deg,#00d4ff,#0077be);"></div>
+                        <div class="bar human-bar" style="height:${humanH}px;background:linear-gradient(180deg,#51cf66,#2d8f47);"></div>
+                        <div class="bar bot-bar" style="height:${botH}px;background:linear-gradient(180deg,#ff6b6b,#c0392b);"></div>
+                        <div class="label">${key}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- AUTO REFRESH ---
+        function startAutoRefresh() {
+            setInterval(() => {
+                loadFromStorage();
+                updateDashboard();
+            }, REFRESH_INTERVAL);
+        }
+
+        // --- EXPORT CSV ---
+        function exportData() {
+            const data = visitorData;
+            if (data.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+
+            let csv = 'ClickID,IP,Time,IsBot,Clicked18,Landed,TimeOnPage,Page\n';
+            data.forEach(v => {
+                csv += `${v.clickID || 'unknown'},${v.ip},${new Date(v.timestamp).toLocaleString()},${v.isBot},${v.clicked18},${v.landed || false},${v.timeOnPage || 0},${v.page || 'unknown'}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'visitor_data_' + new Date().toISOString().slice(0, 10) + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- CLEAR DATA ---
+        function clearData() {
+            if (confirm('Are you sure you want to clear all visitor data?')) {
+                visitorData = [];
+                logEntries = [];
+                saveToStorage();
+                updateDashboard();
+            }
+        }
+
+        // --- EXPOSE GLOBALLY ---
+        window.applyFilters = applyFilters;
+        window.exportData = exportData;
+        window.clearData = clearData;
+
+        console.log('🔍 Traffic Monitor is running!');
+        console.log('📊 Watching for visitors with ClickID tracking');
+    </script>
+
+</body>
+</html>
